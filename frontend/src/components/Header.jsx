@@ -2,9 +2,9 @@ import React from "react";
 
 const Header = () => {
   return (
-    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f5] px-10 py-3">
+    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f5] px-10 py-3 bg-black">
       {/* Left Side - Logo + Title */}
-      <div className="flex items-center gap-4 text-[#111418]">
+      <div className="flex items-center gap-4 text-white">
         <div className="size-4">
           <svg
             viewBox="0 0 48 48"
@@ -17,7 +17,7 @@ const Header = () => {
             ></path>
           </svg>
         </div>
-        <h2 className="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em]">
+        <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
           LegalConnect
         </h2>
       </div>
@@ -26,7 +26,7 @@ const Header = () => {
       <div className="flex flex-1 justify-end gap-8">
         <div className="flex items-center gap-9">
           <a
-            className="text-[#111418] text-sm font-medium leading-normal"
+            className="text-white text-sm font-medium leading-normal"
             href="#"
           >
             For Lawyers

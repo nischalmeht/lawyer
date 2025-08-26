@@ -13,10 +13,19 @@ const io = new Server(server, {
 });
 
 // Map of userId -> socketId
-const userSocketMap = {};
+const userSocketMap = {}; // Stores { userId: { socketId: string, status: string } }
+
+const getOnlineUsers = () => {
+  const onlineUsers = {};
+  for (const userId in userSocketMap) {
+  onlineUsers[userId] = userSocketMap[userId].status;
+  }
+  return onlineUsers;
+};
 
 const getRecieverSocketId = (recieverId) => {
-  return userSocketMap[recieverId];
+  const user = userSocketMap[recieverId];
+  return user ? user.socketId : undefined;
 };
 
 io.on("connection", (socket) => {
@@ -25,11 +34,11 @@ io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
 
   if (userId && userId !== "undefined") {
-    userSocketMap[userId] = socket.id;
-    console.log(`User ${userId} mapped to socket ${socket.id}`);
+    userSocketMap[userId] = { socketId: socket.id, status: "online" };
+    console.log(`User ${userId} mapped to socket ${socket.id} with status online`);
   }
 
-  io.emit("getOnlineUser", Object.keys(userSocketMap));
+  io.emit("getOnlineUser", getOnlineUsers());
 
   if (userId) {
     socket.join(userId);
@@ -65,9 +74,28 @@ io.on("connection", (socket) => {
     console.log("User Disconnected", socket.id);
 
     if (userId) {
-      delete userSocketMap[userId];
-      console.log(`User ${userId} removed from online users`);
-      io.emit("getOnlineUser", Object.keys(userSocketMap));
+      userSocketMap[userId].status = "offline";
+      console.log(`User ${userId} status updated to offline`);
+
+      // Remove user from map after a delay (e.g., 5 minutes) to allow for re-connection
+      // and to truly mark them offline if they don't re-connect
+      setTimeout(() => {
+        if (userSocketMap[userId] && userSocketMap[userId].status === "offline") {
+          delete userSocketMap[userId];
+          console.log(`User ${userId} removed from online users after timeout`);
+          io.emit("getOnlineUser", getOnlineUsers());
+        }
+      }, 300000); // 5 minutes
+
+      io.emit("getOnlineUser", getOnlineUsers());
+    }
+  });
+
+  socket.on("setUserStatus", ({ userId, status }) => {
+    if (userSocketMap[userId]) {
+      userSocketMap[userId].status = status;
+      console.log(`User ${userId} status set to ${status}`);
+      io.emit("userStatusChanged", { userId, status });
     }
   });
 
@@ -82,4 +110,5 @@ module.exports = {
   server,
   io,
   getRecieverSocketId,
+  userSocketMap,
 };

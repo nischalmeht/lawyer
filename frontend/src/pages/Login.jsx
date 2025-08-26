@@ -1,14 +1,26 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../store/slice/userSlice";
+import { useNavigate } from "react-router-dom";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated , loading , user} = useSelector((state) => state.user);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ email, password, rememberMe });
-    // You can call API here
+    dispatch(login({ email, password }));
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="   flex h-full grow flex-col items-center justify-center">
@@ -61,8 +73,9 @@ const Login = () => {
           <button
             type="submit"
             className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 flex-1 bg-[#0d80f2] text-white text-base font-bold leading-normal tracking-[0.015em]"
+            disabled = {loading}
           >
-            <span className="truncate">Log in</span>
+            <span className="truncate">{loading ? "Loading..." : "Log in"}</span>
           </button>
         </div>
 

@@ -10,6 +10,7 @@ class UserController {
             'name': 'required|string',
             'email': 'required|string',
             'password': 'required|string',
+            'profilePhoto': 'string',
         };
         let validation = new Validator(req.body, rules);
         const isValidData = validation.passes();
@@ -23,12 +24,13 @@ class UserController {
             }
             return res.status(400).json(errorResponse);
         }
-        const { name, email, password, role } = req.body;
+        const { name, email, password, role, profilePhoto } = req.body;
         const newUser = await userModel.create({
             name,
             email,
             password,
-            role
+            role,
+            profilePhoto
         })
         generateToken(newUser, "User Registered", 200, res)
     })
@@ -78,5 +80,17 @@ class UserController {
             message: "Logout Successfully.",
         });
     })
+    static getAllLawyers = TryCatch(async (req, res) => {
+    const lawyers = await userModel.find({ role: "lawyer" });
+    if (!lawyers || lawyers.length === 0) {
+        return res.status(404).json({ message: "No lawyers found" });
+    }
+   
+    res.status(200).json({
+      success: true,
+      count: lawyers.length,
+      data: lawyers,
+    });
+  });
 }
 module.exports = UserController

@@ -7,24 +7,32 @@ dotenv.config();
 
 const connectDB = require('./db/db');
 const userRoutes = require('./routes/user.routes');
+const chatRoutes = require('./routes/chat-routes');
+const messageRoutes = require('./routes/message-routes');
 const { server,app } = require('./socket/socket');
 
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", // allow only frontend
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Connect to database
 connectDB();
 
 // Routes
 app.use('/api/users', userRoutes);
 
+app.use('/api', chatRoutes);
+app.use('/api/message', messageRoutes);
 
-const PORT = process.env.PORT || 3000;
 
+const PORT = process.env.PORT || 5000;
 
 
 server.listen(PORT, () => {

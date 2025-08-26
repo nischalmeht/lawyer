@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { register } from "../store/slice/userSlice";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -6,6 +8,10 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agree, setAgree] = useState(false);
+  const [role, setRole] = useState("client");
+  const [profilePhoto, setProfilePhoto] = useState(null);
+
+  const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -15,7 +21,15 @@ const Signup = () => {
       return;
     }
 
-    console.log({ name, email, password, agree });
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("role", role);
+    if (profilePhoto) {
+      formData.append("profilePhoto", profilePhoto);
+    }
+    dispatch(register(formData));
     // Call signup API here
   };
 
@@ -90,6 +104,35 @@ const Signup = () => {
             />
           </label>
         </div>
+
+        {/* Role Selection */}
+        <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3 self-center w-full">
+          <label className="flex flex-col min-w-40 flex-1">
+            <p className="text-[#111418] text-base font-medium pb-2">Role</p>
+            <select
+              className="form-select w-full rounded-lg border border-[#dbe0e6] h-14 p-[15px] text-base text-[#111418] focus:outline-0 focus:ring-0 focus:border-[#dbe0e6]"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <option value="client">Client</option>
+              <option value="lawyer">Lawyer</option>
+            </select>
+          </label>
+        </div>
+
+        {/* Profile Photo (conditionally rendered for lawyers) */}
+        {role === "lawyer" && (
+          <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3 self-center w-full">
+            <label className="flex flex-col min-w-40 flex-1">
+              <p className="text-[#111418] text-base font-medium pb-2">Profile Photo</p>
+              <input
+                type="file"
+                className="form-input w-full rounded-lg border border-[#dbe0e6] h-14 p-[15px] text-base text-[#111418] placeholder:text-[#60758a] focus:outline-0 focus:ring-0 focus:border-[#dbe0e6]"
+                onChange={(e) => setProfilePhoto(e.target.files[0])}
+              />
+            </label>
+          </div>
+        )}
 
         {/* Terms & Conditions */}
         <div className="flex items-center gap-2 px-4 py-3">
